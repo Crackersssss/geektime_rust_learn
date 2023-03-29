@@ -1,17 +1,18 @@
-use clap::{AppSettings, Clap};
-
+use clap::Parser;
+use anyhow::{anyhow, Result};
+use std::str::FromStr;
+use reqwest::Url;
 /// A native httpie implementation with Rust.
 // 定义 HTTPie 的CLI 的主入口，它包含若干个子命令.
-#[derive(Clap, Debug)]
+#[derive(Parser, Debug)]
 #[clap(version = "1.0", author = "cracker <2278801557@qq.com>")]
-#[clap(setting = AppSettings::ColoredHelp)]
 struct Opts {
     #[clap(subcommand)]
     subcmd: Subcommand,
 }
 
 // 子命令分别对应不同的 HTTP 方法，目前仅支持 get 和 post.
-#[derive(Clap, Debug)]
+#[derive(Parser, Debug)]
 enum Subcommand {
     Get(Get),
     Post(Post),
@@ -19,7 +20,7 @@ enum Subcommand {
 
 /// feed get with an url and we will retrieve the response for you.
 // get 子命令.
-#[derive(Clap, Debug)]
+#[derive(Parser, Debug)]
 struct Get {
     #[clap(parse(try_from_str = parse_url))]
     url: String,
@@ -28,12 +29,12 @@ struct Get {
 /// feed post with an url and optional key=value pairs.
 /// We will post the data as JSON, and retrieve the response for you.
 // post 子命令. 需要输入一个 URl，和若干个可选的键值对，用于 JSON 数据传递给服务器。
-#[derive(Clap, Debug)]
+#[derive(Parser, Debug)]
 struct Post {
-    #[clap(parse(try_from_str = parse_url))]
+    #[clap(parse(try_from_str=parse_url))]
     url: String,
-    #[clap(parse(try_from_str = parse_kv_pair))]
-    body: Vec<String>,
+    #[clap(parse(try_from_str=parse_kv_pair))]
+    body: Vec<KvPair>,
 }
 
 // 命令行中的 key=value 可以通过 parse_kv_pair 解析成 KvPair 结构.
@@ -58,4 +59,20 @@ impl FromStr for KvPair {
             v: (split.next().ok_or_else(err)?).to_string(),
         })
     }
+}
+
+// 因为我们为 KvPair 实现了 FromStr，这里可以直接 s.parse() 得到 KvPair
+fn parse_kv_pair(s: &str) -> Result<KvPair> {
+    s.parse()
+}
+
+fn parse_url(s: &str) -> Result<String> {
+    let _url: Url = s.parse()?;
+    Ok(s.into())
+}
+
+
+fn main() {
+    let opts: Opts = Opts::parse();
+    println!("{:?}", opts);
 }

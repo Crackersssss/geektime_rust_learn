@@ -1,4 +1,3 @@
-# simple_httpie
-Simple implementation of HTTPie with rust.
-# course link
+# Course Link
+
 https://github.com/tyrchen/geektime-rust

@@ -7,6 +7,7 @@ use axum::{
     Router
 };
 use bytes::Bytes;
+use image::ImageOutputFormat;
 use lru::LruCache;
 use percent_encoding::{percent_decode_str, percent_encode, NON_ALPHANUMERIC};
 use serde::Deserialize;
@@ -22,6 +23,9 @@ use tracing::{info, instrument};
 
 mod pb;
 use pb::*;
+
+mod engine;
+use engine::Photon;
 
 //参数使用 serde 做 Deserialize，axum 会自动识别并解析
 #[derive(Deserialize)]
@@ -73,10 +77,16 @@ async fn generate(
     let data = retrieve_image(&url, cache)
         .await
         .map_err(|_| StatusCode::BAD_REQUEST)?;
-    //TODO 处理图片
+    // 使用 image engine 处理
+    let mut engine: Photon = data.try_into()
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    engine.apply(&spec.specs);
+    // TODO: 这里目前类型写死了，应该使用 content negotiation
+    let image = engine.generate(ImageOutputFormat::Jpeg(85));
+    info!("Finished processing: image size {}", image.len());
     let mut headers = HeaderMap::new();
     headers.insert("Content-Type", HeaderValue::from_static("image/jpeg"));
-    Ok((headers, data.to_vec()))
+    Ok((headers, image))
 }
 
 #[instrument(level = "info", skip(cache))]

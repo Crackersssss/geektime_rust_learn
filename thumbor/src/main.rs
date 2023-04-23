@@ -25,7 +25,8 @@ mod pb;
 use pb::*;
 
 mod engine;
-use engine::Photon;
+use engine::{Engine, Photon};
+use image::ImageOutputFormat;
 
 //参数使用 serde 做 Deserialize，axum 会自动识别并解析
 #[derive(Deserialize)]

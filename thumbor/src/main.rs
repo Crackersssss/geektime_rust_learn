@@ -1,4 +1,4 @@
-use anyhow::{Result, Ok};
+use anyhow::Result;
 use axum::{
     extract::{Extension, Path},
     handler::get,
@@ -26,7 +26,6 @@ use pb::*;
 
 mod engine;
 use engine::{Engine, Photon};
-use image::ImageOutputFormat;
 
 //参数使用 serde 做 Deserialize，axum 会自动识别并解析
 #[derive(Deserialize)]

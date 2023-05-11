@@ -1,13 +1,13 @@
 fn main() {
-    let x = 1;
-    let y = 2;
+    let x: f32 = 9.0;
+    let y: f32 = 2.0;
     println!("{}", add(x, y));
-    let x = 3.2;
-    let y = 1.2;
     println!("{}", sub(x, y));
+    println!("{}", pro(x, y));
+    println!("{}", quo(x, y));
 }
 
-fn add(x: i32, y: i32) -> i32 {
+fn add<T: std::ops::Add<Output = T>>(x: T, y: T) -> T {
     x + y
 }
 
@@ -15,3 +15,10 @@ fn sub<T: std::ops::Sub<Output = T>>(x: T, y: T) -> T {
     x - y
 }
 
+fn pro<T: std::ops::Mul<Output = T>>(x: T, y: T) -> T {
+    x * y
+}
+
+fn quo<T: std::ops::Div<Output = T>>(x: T, y: T) -> T {
+    x / y
+}
